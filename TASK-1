@@ -1,0 +1,89 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class NumberGuessingGame extends JFrame {
+    private int generatedNumber;
+    private int attempts;
+    private int roundsWon;
+
+    private JTextField guessField;
+    private JLabel feedbackLabel;
+    private JButton guessButton;
+    private JButton newRoundButton;
+    private JLabel scoreLabel;
+
+    public NumberGuessingGame() {
+        setTitle("Number Guessing Game");
+        setSize(300, 200);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        generatedNumber = generateRandomNumber();
+        attempts = 0;
+        roundsWon = 0;
+
+        guessField = new JTextField(10);
+        feedbackLabel = new JLabel("Guess a number between 1 and 100:");
+        guessButton = new JButton("Guess");
+        newRoundButton = new JButton("New Round");
+        scoreLabel = new JLabel("Rounds won: " + roundsWon);
+
+        guessButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                checkGuess();
+            }
+        });
+
+        newRoundButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                startNewRound();
+            }
+        });
+
+        setLayout(new FlowLayout());
+        add(feedbackLabel);
+        add(guessField);
+        add(guessButton);
+        add(newRoundButton);
+        add(scoreLabel);
+
+        setVisible(true);
+    }
+
+    private int generateRandomNumber() {
+        return (int) (Math.random() * 100) + 1;
+    }
+
+    private void checkGuess() {
+        try {
+            int userGuess = Integer.parseInt(guessField.getText());
+            attempts++;
+
+            if (userGuess == generatedNumber) {
+                feedbackLabel.setText("Congratulations! You guessed it right!");
+                roundsWon++;
+                scoreLabel.setText("Rounds won: " + roundsWon);
+            } else if (userGuess < generatedNumber) {
+                feedbackLabel.setText("Try a higher number.");
+            } else {
+                feedbackLabel.setText("Try a lower number.");
+            }
+        } catch (NumberFormatException ex) {
+            feedbackLabel.setText("Please enter a valid number.");
+        }
+    }
+
+    private void startNewRound() {
+        generatedNumber = generateRandomNumber();
+        attempts = 0;
+        feedbackLabel.setText("Guess a number between 1 and 100:");
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new NumberGuessingGame());
+    }
+}
