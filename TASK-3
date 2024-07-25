@@ -1,0 +1,101 @@
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+
+class BankAccount {
+    private double balance;
+
+    public BankAccount(double balance) {
+        this.balance = balance;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+
+    public void deposit(double amount) {
+        balance += amount;
+        JOptionPane.showMessageDialog(null, "Deposit successful. Current balance: " + balance);
+    }
+
+    public boolean withdraw(double amount) {
+        if (balance >= amount) {
+            balance -= amount;
+            JOptionPane.showMessageDialog(null, "Withdrawal successful. Current balance: " + balance);
+            return true;
+        } else {
+            JOptionPane.showMessageDialog(null, "Insufficient balance. Withdrawal failed.");
+            return false;
+        }
+    }
+}
+
+public class ATMGUI extends Frame implements ActionListener {
+    private BankAccount bankAccount;
+    private TextField amountField;
+
+    public ATMGUI(BankAccount bankAccount) {
+        this.bankAccount = bankAccount;
+
+        Label amountLabel = new Label("Amount:");
+        amountField = new TextField(10);
+
+        Button checkBalanceButton = new Button("Check Balance");
+        Button depositButton = new Button("Deposit");
+        Button withdrawButton = new Button("Withdraw");
+
+        checkBalanceButton.addActionListener(this);
+        depositButton.addActionListener(this);
+        withdrawButton.addActionListener(this);
+
+        Panel panel = new Panel();
+        panel.add(amountLabel);
+        panel.add(amountField);
+        panel.add(checkBalanceButton);
+        panel.add(depositButton);
+        panel.add(withdrawButton);
+
+        add(panel);
+        setTitle("ATM Machine");
+        setSize(300, 150);
+        setVisible(true);
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent windowEvent) {
+                System.exit(0);
+            }
+        });
+    }
+
+    public void actionPerformed(ActionEvent e) {
+        String action = e.getActionCommand();
+        switch (action) {
+            case "Check Balance":
+                JOptionPane.showMessageDialog(null, "Your current balance is: " + bankAccount.getBalance());
+                break;
+            case "Deposit":
+                try {
+                    double depositAmount = Double.parseDouble(amountField.getText());
+                    bankAccount.deposit(depositAmount);
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(null, "Invalid amount. Please enter a valid number.");
+                }
+                break;
+            case "Withdraw":
+                try {
+                    double withdrawAmount = Double.parseDouble(amountField.getText());
+                    bankAccount.withdraw(withdrawAmount);
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(null, "Invalid amount. Please enter a valid number.");
+                }
+                break;
+            default:
+                break;
+        }
+        amountField.setText("");
+    }
+
+    public static void main(String[] args) {
+        BankAccount account = new BankAccount(1000); 
+        new ATMGUI(account);
+    }
+}
