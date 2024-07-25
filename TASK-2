@@ -1,0 +1,179 @@
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.Timer;
+
+public class QuizApp extends Frame implements ActionListener {
+
+    private Label questionLabel;
+    private CheckboxGroup optionsGroup;
+    private Checkbox optionA, optionB, optionC, optionD;
+    private Button submitButton;
+    private TextArea resultArea;
+    private Label timerLabel; 
+    
+    private String[] questions = {
+        "Question 1: What is the capital of France?",
+        "Question 2: Which planet is known as the Red Planet?",
+        "Question 3: Who is the author of 'To Kill a Mockingbird'?"
+    };
+    
+    private String[][] options = {
+        {"A. Paris", "B. London", "C. Berlin", "D. Rome"},
+        {"A. Mars", "B. Venus", "C. Jupiter", "D. Saturn"},
+        {"A. Harper Lee", "B. J.K. Rowling", "C. Charles Dickens", "D. Jane Austen"}
+    };
+    
+    private int[] correctAnswers = {0, 0, 0}; 
+    private int currentQuestionIndex = 0;
+    private int score = 0;
+    private Timer questionTimer;
+    private int timeRemaining = 20; 
+    
+    public QuizApp() {
+        setTitle("Quiz Application");
+        setSize(500, 400); 
+        setLayout(new GridBagLayout());
+        
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(10, 10, 10, 10);
+        
+        questionLabel = new Label(questions[currentQuestionIndex]);
+        add(questionLabel, gbc);
+        
+        gbc.gridy++;
+        optionsGroup = new CheckboxGroup();
+        optionA = new Checkbox(options[currentQuestionIndex][0], optionsGroup, false);
+        add(optionA, gbc);
+        
+        gbc.gridy++;
+        optionB = new Checkbox(options[currentQuestionIndex][1], optionsGroup, false);
+        add(optionB, gbc);
+        
+        gbc.gridy++;
+        optionC = new Checkbox(options[currentQuestionIndex][2], optionsGroup, false);
+        add(optionC, gbc);
+        
+        gbc.gridy++;
+        optionD = new Checkbox(options[currentQuestionIndex][3], optionsGroup, false);
+        add(optionD, gbc);
+        
+        gbc.gridy++;
+        gbc.gridwidth = 1;
+        gbc.anchor = GridBagConstraints.CENTER;
+        submitButton = new Button("Submit");
+        submitButton.addActionListener(this);
+        add(submitButton, gbc);
+        
+        gbc.gridx++;
+        gbc.gridy = 1;
+        gbc.gridheight = 5;
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        resultArea = new TextArea(10, 30);
+        add(resultArea, gbc);
+        
+        gbc.gridx = 0;
+        gbc.gridy = 6;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        timerLabel = new Label("Time remaining: " + timeRemaining + " seconds");
+        add(timerLabel, gbc);
+        
+        questionTimer = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                timeRemaining--;
+                timerLabel.setText("Time remaining: " + timeRemaining + " seconds");
+                if (timeRemaining <= 0) {
+                    handleTimeout();
+                }
+            }
+        });
+        questionTimer.start();
+        
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                System.exit(0);
+            }
+        });
+    }
+    
+    public void actionPerformed(ActionEvent e) {
+        questionTimer.stop();
+        Checkbox selectedOption = optionsGroup.getSelectedCheckbox();
+        int selectedOptionIndex = 0;
+        
+        if (selectedOption == optionA) selectedOptionIndex = 0;
+        else if (selectedOption == optionB) selectedOptionIndex = 1;
+        else if (selectedOption == optionC) selectedOptionIndex = 2;
+        else if (selectedOption == optionD) selectedOptionIndex = 3;
+        
+        if (selectedOptionIndex == correctAnswers[currentQuestionIndex]) {
+            score++;
+            resultArea.append("Question " + (currentQuestionIndex + 1) + ": Correct\n");
+        } else {
+            resultArea.append("Question " + (currentQuestionIndex + 1) + ": Incorrect\n");
+        }
+        
+        currentQuestionIndex++;
+        
+        if (currentQuestionIndex < questions.length) {
+            updateQuestion();
+            resetTimer();
+        } else {
+            showResult();
+        }
+    }
+    
+    private void updateQuestion() {
+        questionLabel.setText(questions[currentQuestionIndex]);
+        optionA.setLabel(options[currentQuestionIndex][0]);
+        optionB.setLabel(options[currentQuestionIndex][1]);
+        optionC.setLabel(options[currentQuestionIndex][2]);
+        optionD.setLabel(options[currentQuestionIndex][3]);
+        
+        optionsGroup.setSelectedCheckbox(null);
+        resultArea.setText("");
+        
+        timeRemaining = 20; 
+        timerLabel.setText("Time remaining: " + timeRemaining + " seconds");
+        questionTimer.restart();
+    }
+    
+    private void resetTimer() {
+        timeRemaining = 20; 
+        questionTimer.restart();
+    }
+    
+    private void handleTimeout() {
+        resultArea.append("Question " + (currentQuestionIndex + 1) + ": Time's up!\n");
+        currentQuestionIndex++;
+        
+        if (currentQuestionIndex < questions.length) {
+            updateQuestion();
+            resetTimer();
+        } else {
+            showResult();
+        }
+    }
+    
+    private void showResult() {
+        questionLabel.setText("Quiz Completed!");
+        optionA.setVisible(false);
+        optionB.setVisible(false);
+        optionC.setVisible(false);
+        optionD.setVisible(false);
+        submitButton.setVisible(false);
+        timerLabel.setVisible(false);
+        
+        resultArea.append("\nYour final score: " + score + "/" + questions.length + "\n");
+    }
+    
+    public static void main(String[] args) {
+        QuizApp quizApp = new QuizApp();
+        quizApp.setVisible(true);
+    }
+}
